@@ -9,16 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
-        /* สไตล์สำหรับ Loader */
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen pb-10">
 
-    <div class="bg-white shadow-sm p-4 text-center sticky top-0 z-10">
+    <div class="bg-white shadow-sm p-4 text-center sticky top-0 z-20">
         <div class="flex flex-col items-center justify-center">
-            <img src="https://cdn-icons-png.flaticon.com/512/2922/2922510.png" alt="Logo" class="w-16 h-16 mb-2">
+            <img src="https://img2.pic.in.th/pic/71f81565dc59a7f9545542493a5514ab.png" alt="Logo" class="w-auto h-20 mb-2 object-contain">
             <h1 class="text-xl font-bold text-gray-800">Company Reports</h1>
             <p class="text-xs text-gray-500">ระบบรายงานการปฏิบัติงานประจำวัน</p>
         </div>
@@ -26,67 +25,107 @@
 
     <div class="max-w-md mx-auto p-4 space-y-6">
 
-        <div class="bg-white p-4 rounded-xl shadow-sm">
-            <label class="block text-gray-600 mb-2 font-medium">👤 ชื่อพนักงาน</label>
-            <select id="employeeSelect" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
-                <option value="">กำลังโหลดรายชื่อ...</option>
-            </select>
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <label class="block text-gray-700 mb-2 font-semibold text-lg">👤 ชื่อพนักงาน</label>
+            <div class="relative">
+                <select id="employeeSelect" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg text-gray-700">
+                    <option value="">กำลังโหลดรายชื่อ...</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+            </div>
+            <div id="retryArea" class="hidden mt-2 text-center">
+                <p class="text-red-500 text-sm mb-1">โหลดรายชื่อไม่สำเร็จ</p>
+                <button onclick="loadEmployees()" class="text-blue-500 underline text-sm">ลองใหม่อีกครั้ง</button>
+            </div>
         </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-sm">
-            <label class="block text-gray-600 mb-2 font-medium">📍 พิกัด GPS</label>
-            <div id="gpsStatus" class="flex items-center text-orange-500 text-sm">
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <label class="block text-gray-700 mb-2 font-semibold text-lg">📍 พิกัด GPS</label>
+            <div id="gpsStatus" class="flex items-center text-orange-500 text-sm mb-2">
                 <span class="loader mr-2" id="gpsLoader"></span> กำลังค้นหาตำแหน่ง...
             </div>
-            <input type="text" id="gpsInput" readonly class="w-full mt-2 p-2 bg-gray-100 rounded text-gray-500 text-xs" placeholder="รอพิกัด...">
+            <input type="text" id="gpsInput" readonly class="w-full p-3 bg-gray-100 rounded-lg text-gray-600 text-sm font-mono border border-gray-200" placeholder="รอพิกัด...">
         </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-sm">
-            <label class="block text-gray-600 mb-2 font-medium">📷 ถ่ายรูปหน้างาน</label>
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+            <label class="block text-gray-700 mb-2 font-semibold text-lg">📷 ถ่ายรูปหน้างาน</label>
             
             <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this)">
             
             <div onclick="document.getElementById('cameraInput').click()" 
-                 class="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition min-h-[200px]">
-                <img id="preview" class="hidden max-h-48 rounded shadow-sm mb-2">
-                <div id="cameraIcon" class="text-center">
-                    <div class="text-4xl mb-2">📸</div>
+                 class="border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 h-64 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition relative overflow-hidden group">
+                
+                <div id="cameraIcon" class="text-center group-hover:scale-105 transition">
+                    <div class="text-5xl mb-2 opacity-50">📸</div>
                     <span class="text-sm text-gray-500">แตะเพื่อเปิดกล้อง</span>
                 </div>
+                
+                <img id="preview" class="hidden w-full h-full object-cover absolute inset-0">
             </div>
+            <p id="imgStatus" class="text-center text-xs text-gray-400 mt-2">ยังไม่ได้เลือกรูปภาพ</p>
         </div>
 
-        <div class="grid grid-cols-3 gap-3 pt-2">
-            <button onclick="submitForm('เช้า')" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-xl font-medium shadow-md transition transform active:scale-95 flex flex-col items-center gap-1">
-                ☀️ <span>เข้างานเช้า</span>
+        <div class="grid grid-cols-3 gap-4 pt-4">
+            <button onclick="submitForm('เช้า')" class="bg-gradient-to-br from-green-400 to-green-600 text-white py-4 rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition flex flex-col items-center justify-center">
+                <span class="text-2xl mb-1">☀️</span>
+                <span class="font-semibold">เข้างานเช้า</span>
             </button>
-            <button onclick="submitForm('บ่าย')" class="bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-xl font-medium shadow-md transition transform active:scale-95 flex flex-col items-center gap-1">
-                🌤 <span>เข้างานบ่าย</span>
+            <button onclick="submitForm('บ่าย')" class="bg-gradient-to-br from-orange-400 to-orange-600 text-white py-4 rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition flex flex-col items-center justify-center">
+                <span class="text-2xl mb-1">🌤</span>
+                <span class="font-semibold">เข้างานบ่าย</span>
             </button>
-            <button onclick="submitForm('เรื่องร้องเรียน')" class="bg-red-500 hover:bg-red-600 text-white p-3 rounded-xl font-medium shadow-md transition transform active:scale-95 flex flex-col items-center gap-1">
-                📢 <span>แจ้งปัญหา</span>
+            <button onclick="submitForm('เรื่องร้องเรียน')" class="bg-gradient-to-br from-red-400 to-red-600 text-white py-4 rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition flex flex-col items-center justify-center">
+                <span class="text-2xl mb-1">📢</span>
+                <span class="font-semibold">แจ้งปัญหา</span>
             </button>
         </div>
 
     </div>
 
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex flex-col items-center justify-center text-white">
-        <div class="loader mb-4" style="border-top-color: white;"></div>
-        <p>กำลังส่งข้อมูล...</p>
+    <div id="overlay" class="fixed inset-0 bg-black/80 z-50 hidden flex flex-col items-center justify-center text-white backdrop-blur-sm">
+        <div class="loader mb-4 w-10 h-10" style="border-top-color: white; width: 40px; height: 40px;"></div>
+        <p class="text-lg font-light animate-pulse">กำลังส่งข้อมูล...</p>
     </div>
 
     <script>
-        // ใส่ URL Web App ของคุณที่นี่
+        // ******************************************************
+        // ⚠️ วาง URL Web App ของคุณที่นี่ (ที่ลงท้ายด้วย /exec)
+        // ******************************************************
         const SCRIPT_URL = 'https://script.google.com/macros/s/xxxxxxxxxxxxxxxxxxxxxxxxx/exec';
 
         let base64Image = "";
 
-        // 1. โหลดรายชื่อพนักงานเมื่อเปิดเว็บ
+        // เริ่มทำงานเมื่อเปิดเว็บ
         window.onload = function() {
+            loadEmployees();
+            getLocation();
+        };
+
+        // ฟังก์ชันโหลดรายชื่อพนักงาน
+        function loadEmployees() {
+            const select = document.getElementById('employeeSelect');
+            const retryArea = document.getElementById('retryArea');
+            
+            select.innerHTML = '<option value="">⏳ กำลังโหลด...</option>';
+            select.disabled = true;
+            retryArea.classList.add('hidden');
+
             fetch(SCRIPT_URL + '?op=getEmployees')
-                .then(res => res.json())
+                .then(res => {
+                    // ตรวจสอบว่าเป็น JSON หรือไม่ (ป้องกันกรณีส่งกลับมาเป็น HTML Error Page)
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        return res.json();
+                    } else {
+                        throw new Error("Server ไม่ได้ส่งกลับเป็น JSON (อาจลืมตั้งค่า Access: Anyone)");
+                    }
+                })
                 .then(data => {
-                    const select = document.getElementById('employeeSelect');
+                    // กรณี Error จาก Script (เช่น หา Sheet ไม่เจอ)
+                    if (data.status === 'error') throw new Error(data.message);
+
                     select.innerHTML = '<option value="">-- เลือกชื่อพนักงาน --</option>';
                     data.forEach(name => {
                         const opt = document.createElement('option');
@@ -94,60 +133,71 @@
                         opt.innerText = name;
                         select.appendChild(opt);
                     });
+                    select.disabled = false;
+                })
+                .catch(err => {
+                    console.error("Load Error:", err);
+                    select.innerHTML = '<option value="">❌ โหลดไม่สำเร็จ</option>';
+                    retryArea.classList.remove('hidden');
+                    alert("ไม่สามารถโหลดรายชื่อได้: " + err.message + "\n\nคำแนะนำ: ลองเช็ค URL หรือการตั้งค่า Deploy");
                 });
-            
-            // เริ่มหา GPS ทันที
-            getLocation();
-        };
+        }
 
-        // 2. ฟังก์ชันหา GPS
+        // ฟังก์ชันหา GPS
         function getLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError);
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lng = position.coords.longitude.toFixed(6);
+                        document.getElementById("gpsInput").value = `${lat}, ${lng}`;
+                        document.getElementById("gpsStatus").innerHTML = '<span class="text-green-500 font-bold flex items-center">✅ ระบุตำแหน่งแล้ว</span>';
+                    },
+                    (error) => {
+                        document.getElementById("gpsStatus").innerHTML = '<span class="text-red-500 font-bold">❌ เปิด GPS ไม่สำเร็จ</span>';
+                        alert("กรุณาอนุญาตให้เข้าถึงตำแหน่ง (GPS) เพื่อใช้งาน");
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
             } else {
                 document.getElementById("gpsStatus").innerText = "Browser ไม่รองรับ GPS";
             }
         }
 
-        function showPosition(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            document.getElementById("gpsInput").value = `${lat}, ${lng}`;
-            document.getElementById("gpsStatus").innerHTML = '<span class="text-green-500">✅ ระบุตำแหน่งเรียบร้อย</span>';
-        }
-
-        function showError(error) {
-            document.getElementById("gpsStatus").innerText = "❌ ไม่สามารถระบุตำแหน่งได้";
-        }
-
-        // 3. ฟังก์ชันแปลงรูปเป็น Base64 และ Preview
+        // ฟังก์ชันรูปภาพ
         function previewImage(input) {
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("ไฟล์รูปใหญ่เกินไป (ต้องไม่เกิน 5MB)");
+                    return;
+                }
+
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     document.getElementById('preview').src = e.target.result;
                     document.getElementById('preview').classList.remove('hidden');
                     document.getElementById('cameraIcon').classList.add('hidden');
-                    base64Image = e.target.result; // เก็บค่า Base64 ไว้ส่ง
+                    document.getElementById('imgStatus').innerText = "✅ พร้อมส่งรูปภาพ";
+                    document.getElementById('imgStatus').classList.add('text-green-500');
+                    base64Image = e.target.result;
                 }
-                // ลดขนาดรูปก่อน (Optional แต่นิยมทำเพื่อลดเวลาส่ง)
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 
-        // 4. ฟังก์ชันส่งข้อมูล (Submit)
+        // ฟังก์ชันส่งข้อมูล
         function submitForm(type) {
             const name = document.getElementById('employeeSelect').value;
             const gps = document.getElementById('gpsInput').value;
 
-            // Validation
             if (!name) return alert("กรุณาเลือกชื่อพนักงาน");
-            if (!gps) return alert("กรุณารอ GPS ระบุตำแหน่งสักครู่");
-            if (!base64Image) return alert("กรุณาถ่ายรูปหน้างาน");
+            if (!gps) return alert("กรุณารอ GPS หรืออนุญาตการเข้าถึงตำแหน่ง");
+            if (!base64Image) return alert("กรุณาถ่ายรูปหน้างานก่อนส่ง");
 
-            if(!confirm(`ยืนยันการส่งรายงาน "${type}" ใช่หรือไม่?`)) return;
+            // ยืนยัน
+            if(!confirm(`ยืนยันส่งข้อมูล "${type}" ของคุณ ${name}?`)) return;
 
-            // แสดง Loading
             document.getElementById('overlay').classList.remove('hidden');
 
             const payload = {
@@ -163,12 +213,16 @@
             })
             .then(res => res.json())
             .then(data => {
-                alert('ส่งรายงานเรียบร้อย!');
-                location.reload(); // รีเฟรชหน้าเริ่มใหม่
+                if(data.status === 'success'){
+                    alert('✅ บันทึกข้อมูลสำเร็จ!');
+                    location.reload(); 
+                } else {
+                    throw new Error(data.message);
+                }
             })
             .catch(err => {
                 console.error(err);
-                alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+                alert('❌ เกิดข้อผิดพลาด: ' + err.message);
                 document.getElementById('overlay').classList.add('hidden');
             });
         }
