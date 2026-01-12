@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App .github.io</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .card { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <h1>รายชื่อจาก Google Sheets</h1>
+    <div id="app">กำลังโหลดข้อมูล...</div>
+
+    <script>
+        // วาง URL ที่ได้จากขั้นตอนที่ 1 ตรงนี้
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzz8WfnnTgUKlv2I2c-cQ627aLzyrfNRcawmSrjNC97szsZzLuL-a0zb4W-Xx12mFBv/exec';
+
+        fetch(SCRIPT_URL)
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('app');
+                container.innerHTML = ''; // ล้างข้อความ Loading
+                
+                // วนลูปแสดงข้อมูล (สมมติว่าแถวแรกเป็น Header ให้เริ่มที่ index 1)
+                data.slice(1).forEach(row => {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerText = `ชื่อ: ${row[0]} | อีเมล: ${row[1]}`; // อ้างอิงตามคอลัมน์ใน Sheet
+                    container.appendChild(div);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
