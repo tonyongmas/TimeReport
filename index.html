@@ -1,38 +1,54 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My App .github.io</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .card { border: 1px solid #ddd; padding: 10px; margin: 10px 0; border-radius: 8px; }
-    </style>
-</head>
-<body>
+<div class="card">
+    <h3>เพิ่มข้อมูลใหม่</h3>
+    <form id="myForm">
+        <label>ชื่อ:</label><br>
+        <input type="text" name="name" required placeholder="ใส่ชื่อที่นี่"><br><br>
+        
+        <label>อีเมล:</label><br>
+        <input type="email" name="email" required placeholder="example@mail.com"><br><br>
+        
+        <button type="submit" id="btnSubmit">บันทึกข้อมูล</button>
+    </form>
+</div>
 
-    <h1>รายชื่อจาก Google Sheets</h1>
-    <div id="app">กำลังโหลดข้อมูล...</div>
+<script>
+    // URL เดิมของคุณ
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzz8WfnnTgUKlv2I2c-cQ627aLzyrfNRcawmSrjNC97szsZzLuL-a0zb4W-Xx12mFBv/exec';
 
-    <script>
-        // วาง URL ที่ได้จากขั้นตอนที่ 1 ตรงนี้
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzz8WfnnTgUKlv2I2c-cQ627aLzyrfNRcawmSrjNC97szsZzLuL-a0zb4W-Xx12mFBv/exec';
+    const form = document.getElementById('myForm');
+    const btn = document.getElementById('btnSubmit');
 
-        fetch(SCRIPT_URL)
-            .then(response => response.json())
-            .then(data => {
-                const container = document.getElementById('app');
-                container.innerHTML = ''; // ล้างข้อความ Loading
-                
-                // วนลูปแสดงข้อมูล (สมมติว่าแถวแรกเป็น Header ให้เริ่มที่ index 1)
-                data.slice(1).forEach(row => {
-                    const div = document.createElement('div');
-                    div.className = 'card';
-                    div.innerText = `ชื่อ: ${row[0]} | อีเมล: ${row[1]}`; // อ้างอิงตามคอลัมน์ใน Sheet
-                    container.appendChild(div);
-                });
-            })
-            .catch(error => console.error('Error:', error));
-    </script>
-</body>
-</html>
+    form.addEventListener('submit', e => {
+        e.preventDefault(); // ป้องกันไม่ให้หน้าเว็บรีเฟรช
+        
+        // 1. เปลี่ยนปุ่มเป็นสถานะกำลังโหลด
+        btn.innerText = 'กำลังบันทึก...';
+        btn.disabled = true;
+
+        // 2. ดึงค่าจากฟอร์มสร้างเป็น Object
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData); 
+
+        // 3. ส่งข้อมูลด้วย fetch (POST)
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            // เทคนิค: ส่งแบบ text/plain เพื่อหลีกเลี่ยงปัญหา CORS ของ Google
+            body: JSON.stringify(data) 
+        })
+        .then(res => res.text()) // อ่านค่าตอบกลับเป็น Text ก่อน
+        .then(result => {
+             // 4. เมื่อสำเร็จ
+             alert("บันทึกเรียบร้อย!");
+             form.reset(); // ล้างฟอร์ม
+        })
+        .catch(err => {
+             console.error(err);
+             alert("เกิดข้อผิดพลาด ดูที่ Console");
+        })
+        .finally(() => {
+             // คืนค่าปุ่มให้กดได้ใหม่
+             btn.innerText = 'บันทึกข้อมูล';
+             btn.disabled = false;
+        });
+    });
+</script>
