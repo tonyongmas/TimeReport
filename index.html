@@ -11,12 +11,8 @@
     
     <style>
         body { font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        /* ปุ่มเลือก */
         .btn-select { transition: all 0.2s; border: 2px solid transparent; opacity: 0.8; transform: scale(0.98); }
         .btn-select.active { border-color: #3b82f6; opacity: 1; transform: scale(1); box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); background-color: white; }
-        
-        /* Loader */
         .loader { border: 3px solid #e2e8f0; border-top: 3px solid #3b82f6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -25,19 +21,15 @@
 
     <div class="bg-white/95 backdrop-blur-md shadow-md pt-6 pb-6 px-4 text-center sticky top-0 z-30 rounded-b-3xl">
         <div class="flex flex-col items-center justify-center">
-            
             <img src="https://img2.pic.in.th/pic/71f81565dc59a7f9545542493a5514ab.png" 
                  alt="Logo" 
-                 class="w-auto h-24 mb-3 object-contain drop-shadow-xl transform transition hover:scale-105 duration-300">
-            
+                 class="w-auto h-28 mb-3 object-contain drop-shadow-xl transform transition hover:scale-105 duration-300">
             <h1 class="text-2xl font-bold text-slate-800 tracking-wide">
                 ระบบรายงานประจำวัน
             </h1>
-            
             <p class="text-sm text-slate-500 mt-1 font-light">
                 งานเทศกิจ เทศบาลตำบลตันหยงมัส
             </p>
-
         </div>
     </div>
 
@@ -63,10 +55,10 @@
             </label>
             <div class="grid grid-cols-3 gap-3">
                 <button onclick="selectType('เช้า', this)" class="btn-select bg-green-50 hover:bg-green-100 text-green-700 py-4 rounded-xl font-medium flex flex-col items-center gap-1">
-                    <span class="text-2xl">☀️</span><span class="text-sm">เช้า</span>
+                    <span class="text-2xl">☀️</span><span class="text-sm">เข้าเวรเช้า</span>
                 </button>
                 <button onclick="selectType('บ่าย', this)" class="btn-select bg-orange-50 hover:bg-orange-100 text-orange-700 py-4 rounded-xl font-medium flex flex-col items-center gap-1">
-                    <span class="text-2xl">🌤</span><span class="text-sm">บ่าย</span>
+                    <span class="text-2xl">🌤</span><span class="text-sm">เข้าเวรบ่าย</span>
                 </button>
                 <button onclick="selectType('เรื่องร้องเรียน', this)" class="btn-select bg-red-50 hover:bg-red-100 text-red-700 py-4 rounded-xl font-medium flex flex-col items-center gap-1">
                     <span class="text-2xl">📢</span><span class="text-sm">แจ้งปัญหา</span>
@@ -87,7 +79,7 @@
             <div class="flex gap-2">
                 <input type="text" id="gpsInput" readonly class="flex-1 p-3 bg-slate-100 rounded-xl text-slate-500 text-xs font-mono border border-slate-200" placeholder="รอการระบุพิกัด...">
                 <button onclick="getLocation()" id="btnGPS" class="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2 min-w-[110px] active:scale-95">
-                    <span id="gpsLabel" class="text-sm font-medium">ดึงพิกัด</span>
+                    📍 <span id="gpsLabel" class="text-sm font-medium">ดึงพิกัด</span>
                 </button>
             </div>
         </div>
@@ -97,7 +89,8 @@
                 <span class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">4</span>
                 รูปภาพปฏิบัติงาน
             </label>
-            <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this)">
+            
+            <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="previewAndResizeImage(this)">
             
             <div onclick="document.getElementById('cameraInput').click()" 
                  class="border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50 h-56 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 hover:border-blue-400 transition relative overflow-hidden group">
@@ -105,10 +98,16 @@
                 <div id="cameraIcon" class="text-center group-hover:scale-110 transition duration-300">
                     <div class="text-5xl mb-3 opacity-40 grayscale">📸</div>
                     <span class="text-sm text-slate-500 font-medium">แตะเพื่อถ่ายภาพ</span>
+                    <p class="text-[10px] text-slate-400 mt-1">(ระบบจะย่อรูปให้อัตโนมัติ)</p>
                 </div>
                 
                 <img id="preview" class="hidden w-full h-full object-cover absolute inset-0">
                 
+                <div id="processingImg" class="hidden absolute inset-0 bg-white/80 flex flex-col items-center justify-center z-20">
+                    <div class="loader mb-2"></div>
+                    <span class="text-xs text-blue-600 font-bold">กำลังย่อไฟล์รูป...</span>
+                </div>
+
                 <button id="btnRemoveImg" onclick="removeImage(event)" class="hidden absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full shadow-lg z-10 flex items-center justify-center hover:bg-red-600">✕</button>
             </div>
         </div>
@@ -201,26 +200,67 @@
             }
         }
 
-        function previewImage(input) {
+        // --- 🛠️ ฟังก์ชันใหม่: ย่อรูปภาพ (Resize Image) ---
+        function previewAndResizeImage(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                if (file.size > 5 * 1024 * 1024) return Swal.fire('ไฟล์ใหญ่ไป', 'รูปต้องขนาดไม่เกิน 5MB', 'warning');
+                
+                // แสดงสถานะกำลังทำงาน
+                document.getElementById('cameraIcon').classList.add('hidden');
+                document.getElementById('processingImg').classList.remove('hidden');
 
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('preview').src = e.target.result;
-                    document.getElementById('preview').classList.remove('hidden');
-                    document.getElementById('cameraIcon').classList.add('hidden');
-                    document.getElementById('btnRemoveImg').classList.remove('hidden'); // โชว์ปุ่มลบ
-                    base64Image = e.target.result;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        // กำหนดขนาดสูงสุดที่ต้องการ (800px ก็พอสำหรับดูในมือถือและชัดเจน)
+                        const MAX_WIDTH = 800;
+                        const MAX_HEIGHT = 800;
+                        
+                        let width = img.width;
+                        let height = img.height;
+
+                        // คำนวณอัตราส่วนเพื่อย่อรูป
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        // สร้าง Canvas เพื่อวาดรูปใหม่
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // แปลงกลับเป็น Base64 (JPEG Quality 0.7 = 70%)
+                        // ช่วยลดขนาดไฟล์ลงได้เยอะมาก (จาก 5MB เหลือ ~200KB)
+                        const resizedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+
+                        // แสดงผล
+                        document.getElementById('preview').src = resizedBase64;
+                        document.getElementById('preview').classList.remove('hidden');
+                        document.getElementById('processingImg').classList.add('hidden');
+                        document.getElementById('btnRemoveImg').classList.remove('hidden');
+                        
+                        // เก็บค่าไว้ส่ง
+                        base64Image = resizedBase64;
+                    }
+                    img.src = event.target.result;
                 }
                 reader.readAsDataURL(file);
             }
         }
         
-        // ฟังก์ชันลบรูป (เพิ่มเข้ามาเผื่อถ่ายผิด)
         function removeImage(e) {
-            e.stopPropagation(); // ป้องกันการกดทะลุไปเปิดกล้อง
+            e.stopPropagation(); 
             document.getElementById('cameraInput').value = "";
             document.getElementById('preview').src = "";
             document.getElementById('preview').classList.add('hidden');
@@ -248,7 +288,7 @@
             // SweetAlert2 Loading
             Swal.fire({
                 title: 'กำลังส่งข้อมูล...',
-                html: 'กรุณารอสักครู่ ห้ามปิดหน้าจอ',
+                html: 'ระบบกำลังอัปโหลดรูปภาพและบันทึกข้อมูล',
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading() }
             });
@@ -288,4 +328,3 @@
     </script>
 </body>
 </html>
-
